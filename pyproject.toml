@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kanoniv-langgraph"
+version = "0.1.0"
+description = "Cryptographic identity and delegation for LangGraph agents"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = ["agent", "identity", "langgraph", "delegation", "did", "ed25519"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security :: Cryptography",
+]
+dependencies = [
+    "kanoniv-agent-auth>=0.2.0",
+    "langgraph>=0.2.0",
+]
+
+[project.urls]
+Repository = "https://github.com/kanoniv/kanoniv-langgraph"
+Homepage = "https://kanoniv.com"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kanoniv_langgraph"]
