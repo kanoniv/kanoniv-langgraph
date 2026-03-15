@@ -73,11 +73,13 @@ class DelegatedAgent:
         keypair: AgentKeyPair,
         delegation: Delegation,
         root_identity: AgentIdentity,
+        graph: "DelegatedGraph | None" = None,
     ):
         self.name = name
         self.keypair = keypair
         self.delegation = delegation
         self.root_identity = root_identity
+        self.graph = graph
         self.history: list[dict] = []
 
     @property
@@ -101,11 +103,20 @@ class DelegatedAgent:
         Returns (invoker_did, root_did, chain, depth).
         Raises ValueError if delegation doesn't allow it.
         """
+        if self.graph and self.graph.is_revoked(self):
+            raise ValueError(f"Agent '{self.name}' delegation has been revoked")
         args = args or {}
         invocation = Invocation.create(
             self.keypair, action, json.dumps(args), self.delegation
         )
-        return verify_invocation(invocation, self.identity, self.root_identity)
+        result = verify_invocation(invocation, self.identity, self.root_identity)
+        self.history.append({
+            "action": action,
+            "chain": result[2],
+            "depth": result[3],
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+        return result
 
     def __repr__(self) -> str:
         return f"DelegatedAgent(name='{self.name}', did='{self.did}')"
@@ -172,7 +183,7 @@ class DelegatedGraph:
         delegation = Delegation.create_root(
             self.root_keypair, keypair.identity().did, json.dumps(caveats)
         )
-        agent = DelegatedAgent(name, keypair, delegation, self.root_identity)
+        agent = DelegatedAgent(name, keypair, delegation, self.root_identity, graph=self)
         self.agents[name] = agent
         return agent
 
@@ -194,7 +205,7 @@ class DelegatedGraph:
             from_agent.keypair, keypair.identity().did,
             json.dumps(caveats), from_agent.delegation
         )
-        agent = DelegatedAgent(name, keypair, delegation, self.root_identity)
+        agent = DelegatedAgent(name, keypair, delegation, self.root_identity, graph=self)
         self.agents[name] = agent
         return agent
 
