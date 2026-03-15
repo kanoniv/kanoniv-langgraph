@@ -3,7 +3,7 @@
 import json
 import functools
 from datetime import datetime, timezone, timedelta
-from typing import Any, Callable, Optional, TypedDict
+from typing import Any, Callable, TypedDict
 
 from kanoniv_agent_auth import (
     AgentKeyPair,
@@ -12,7 +12,6 @@ from kanoniv_agent_auth import (
     Invocation,
     McpProof,
     verify_invocation,
-    verify_mcp_call,
 )
 
 
